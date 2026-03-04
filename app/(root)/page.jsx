@@ -57,6 +57,7 @@ export default function Home() {
           <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-md">
             Get started by editing this page. Build something amazing.
           </p>
+            <button className="backdrop-blur-2xl text-blue-600 rounded-4xl bg-amber-100 min-w-2 p-3" >AI</button>
         </section>
       </main>
     </>
