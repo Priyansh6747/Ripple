@@ -1,6 +1,6 @@
 "use client";
 
-import { UserButton, SignInButton, useUser } from "@clerk/nextjs";
+import { UserButton, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 
 function Navbar() {
@@ -24,11 +24,20 @@ function Navbar() {
           />
         )}
         {isLoaded && !isSignedIn && (
-          <SignInButton mode="modal">
-            <button className="px-4 py-2 text-sm font-medium rounded-full bg-zinc-900 text-white hover:bg-zinc-700 dark:bg-white dark:text-black dark:hover:bg-zinc-300 transition-colors">
+          <>
+            <Link
+              href="/sign-in"
+              className="px-4 py-2 text-sm font-medium rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            >
               Sign In
-            </button>
-          </SignInButton>
+            </Link>
+            <Link
+              href="/sign-up"
+              className="px-4 py-2 text-sm font-medium rounded-full bg-zinc-900 text-white hover:bg-zinc-700 dark:bg-white dark:text-black dark:hover:bg-zinc-300 transition-colors"
+            >
+              Sign Up
+            </Link>
+          </>
         )}
       </div>
     </nav>
