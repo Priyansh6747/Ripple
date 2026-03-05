@@ -1,8 +1,8 @@
 "use server"
 
-import {inngest} from "lib/inngest/client"
+import { inngest } from "../../lib/inngest/client"
 
-const onInvokeAI = async ()=>{
+export const onInvokeAI = async () => {
     await inngest.send({
         name: "test/hello"
     })

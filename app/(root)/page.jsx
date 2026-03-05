@@ -3,7 +3,8 @@
 
 import { UserButton, useUser } from "@clerk/nextjs";
 import Link from "next/link";
-import {Button} from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { onInvokeAI } from "@/modules/actions";
 
 function Navbar() {
   const { isSignedIn, isLoaded } = useUser();
@@ -48,7 +49,9 @@ function Navbar() {
 
 export default function Home() {
 
-
+  const onCall = async () => {
+    await onInvokeAI();
+  }
   return (
     <>
       <Navbar />
@@ -61,7 +64,7 @@ export default function Home() {
           <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-md">
             Get started by editing this page. Build something amazing.
           </p>
-            <Button onClick={onINvoke}>AI</Button>
+          <Button onClick={onCall}>AI</Button>
         </section>
       </main>
     </>
