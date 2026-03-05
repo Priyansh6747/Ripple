@@ -1,7 +1,9 @@
 "use client";
 
+
 import { UserButton, useUser } from "@clerk/nextjs";
 import Link from "next/link";
+import {Button} from "@/components/ui/button";
 
 function Navbar() {
   const { isSignedIn, isLoaded } = useUser();
@@ -45,6 +47,8 @@ function Navbar() {
 }
 
 export default function Home() {
+
+
   return (
     <>
       <Navbar />
@@ -57,7 +61,7 @@ export default function Home() {
           <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-md">
             Get started by editing this page. Build something amazing.
           </p>
-            <button className="backdrop-blur-2xl text-blue-600 rounded-4xl bg-amber-100 min-w-2 p-3" >AI</button>
+            <Button onClick={onINvoke}>AI</Button>
         </section>
       </main>
     </>
