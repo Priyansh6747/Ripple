@@ -11,7 +11,6 @@
   "dependencies": {
     "@base-ui/react": "^1.2.0",
     "@clerk/nextjs": "^7.0.1",
-    "@e2b/sdk": "^0.12.5",
     "@gsap/react": "^2.1.2",
     "@hookform/resolvers": "^5.2.2",
     "@inngest/agent-kit": "^0.13.2",
