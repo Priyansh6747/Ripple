@@ -4,7 +4,7 @@
 import { UserButton, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { onInvokeAI } from "@/modules/actions";
+import { onTestGemini } from "@/modules/actions";
 
 function Navbar() {
   const { isSignedIn, isLoaded } = useUser();
@@ -50,7 +50,7 @@ function Navbar() {
 export default function Home() {
 
   const onCall = async () => {
-    await onInvokeAI();
+    await onTestGemini();
   }
   return (
     <>
