@@ -10,20 +10,14 @@ log() {
   echo "[sandbox] $1"
 }
 
-check_server() {
-  curl -s -o /dev/null -w "%{http_code}" "http://localhost:${PORT}" || true
-}
-
-wait_for_server() {
+wait_for_port() {
   log "Waiting for Next.js server on port ${PORT}..."
 
   local start_time
   start_time=$(date +%s)
 
   while true; do
-    status=$(check_server)
-
-    if [[ "$status" == "200" ]]; then
+    if nc -z localhost "$PORT" 2>/dev/null; then
       log "Next.js server is ready."
       break
     fi
@@ -51,15 +45,12 @@ trap shutdown SIGINT SIGTERM
 
 cd "$APP_DIR"
 
-log "Installing dependencies (if needed)..."
-npm install --silent
-
 log "Starting Next.js dev server..."
 
 npm run dev -- --turbopack --port "$PORT" &
 NEXT_PID=$!
 
-wait_for_server
+wait_for_port
 
 log "Sandbox ready 🚀"
 
