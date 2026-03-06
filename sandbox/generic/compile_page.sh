@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-APP_DIR="/home/user"
+APP_DIR="/home/user/app"
 PORT="${PORT:-3000}"
 START_TIMEOUT=120
 
