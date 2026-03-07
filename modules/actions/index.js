@@ -7,7 +7,8 @@ export const onInvokeAI = async (prompt) => {
         name: "test/hello",
         data: { prompt },
     })
-    return result
+    // result.ids contains the event IDs assigned by Inngest
+    return { ids: result.ids }
 }
 
 export const onTestGemini = async () => {

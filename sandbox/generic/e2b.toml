@@ -1,5 +1,5 @@
 # This is a config for E2B sandbox template.
-# You can use template ID (zngf8ek7qzav6qfym02k) or template name (ripple_net_generic) to create a sandbox:
+# You can use template ID (qzv1h78rnvftdizmkfay) or template name (ripple_net_generic) to create a sandbox:
 
 # Python SDK
 # from e2b import Sandbox, AsyncSandbox
@@ -14,4 +14,4 @@
 start_cmd = "/compile_page.sh"
 dockerfile = "e2b.Dockerfile"
 template_name = "ripple_net_generic"
-template_id = "zngf8ek7qzav6qfym02k"
+template_id = "qzv1h78rnvftdizmkfay"

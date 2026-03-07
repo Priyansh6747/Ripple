@@ -100,26 +100,33 @@ export default function BuildPage() {
         ]);
     };
 
-    const pollSandbox = (sid) => {
+    const pollByEventId = (eventId) => {
         let attempts = 0;
         pollRef.current = setInterval(async () => {
             attempts++;
             try {
-                const res = await fetch(`/api/build?sandboxId=${sid}`);
+                const res = await fetch(`/api/build?eventId=${eventId}`);
                 const data = await res.json();
                 if (data.ready) {
                     clearInterval(pollRef.current);
                     setPreviewUrl(data.url);
+                    setSandboxId(data.sandboxId || "");
                     setStatus(STATUS.READY);
                     addLog("✅ Preview is live!");
-                } else if (attempts > 90) {
+                } else if (data.status === "error") {
                     clearInterval(pollRef.current);
                     setStatus(STATUS.ERROR);
-                    setError("Sandbox took too long to start");
-                    addLog("❌ Timeout waiting for preview");
+                    setError(data.error || "Build failed");
+                    addLog(`❌ Error: ${data.error}`);
+                } else if (attempts > 120) {
+                    // ~6 minutes timeout (120 * 3s)
+                    clearInterval(pollRef.current);
+                    setStatus(STATUS.ERROR);
+                    setError("Build took too long — timed out");
+                    addLog("❌ Timeout waiting for build to complete");
                 }
             } catch {
-                // keep polling
+                // keep polling on network blips
             }
         }, 3000);
     };
@@ -145,17 +152,14 @@ export default function BuildPage() {
             addLog("📦 Inngest event sent. Agents are working…");
             setStatus(STATUS.BUILDING);
 
-            // We can't get the sandboxId from the Inngest event send response directly.
-            // The actual sandbox URL comes back when the function completes.
-            // For now we poll after a delay to give the function time to create the sandbox.
-            addLog("⏳ Waiting for sandbox to spin up…");
+            const eventId = result?.ids?.[0];
+            if (!eventId) {
+                throw new Error("No event ID returned from Inngest");
+            }
 
-            // Poll using a simulated delay – in production, you'd use Inngest's
-            // run status API or webhooks. For now, start polling after 30s.
-            setTimeout(() => {
-                addLog("🔍 Polling for preview readiness…");
-                // We'll keep status as BUILDING and let user know things are happening
-            }, 10000);
+            addLog("⏳ Waiting for sandbox to spin up…");
+            addLog("🔍 Polling for preview readiness…");
+            pollByEventId(eventId);
         } catch (err) {
             setStatus(STATUS.ERROR);
             setError(err.message || "Failed to invoke AI");
