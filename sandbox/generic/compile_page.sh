@@ -1,57 +1,41 @@
-#!/usr/bin/env bash
+FROM node:22-slim
 
-set -euo pipefail
+ENV NODE_ENV=development
+ENV PORT=3000
 
-APP_DIR="/home/user/app"
-PORT="${PORT:-3000}"
-START_TIMEOUT=120
+RUN apt-get update \
+ && apt-get install -y curl git ca-certificates \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
-log() {
-  echo "[sandbox] $1"
-}
+WORKDIR /home/user
 
-wait_for_port() {
-  log "Waiting for Next.js server on port ${PORT}..."
+COPY compile_page.sh /compile_page.sh
+RUN chmod +x /compile_page.sh
 
-  local start_time
-  start_time=$(date +%s)
+RUN CI=true npx --yes create-next-app@16.1.6 app \
+  --ts \
+  --tailwind \
+  --eslint \
+  --app \
+  --src-dir \
+  --import-alias "@/*" \
+  --use-npm \
+  --no-git
 
-  while true; do
-    if nc -z localhost "$PORT" 2>/dev/null; then
-      log "Next.js server is ready."
-      break
-    fi
+WORKDIR /home/user/app
 
-    now=$(date +%s)
-    elapsed=$((now - start_time))
+RUN npm install
 
-    if (( elapsed > START_TIMEOUT )); then
-      log "Server failed to start within ${START_TIMEOUT}s"
-      exit 1
-    fi
+RUN npm install \
+  lucide-react \
+  clsx \
+  tailwind-merge \
+  framer-motion
 
-    sleep 0.2
-  done
-}
+RUN npx --yes shadcn@latest init -d
+RUN npx --yes shadcn@latest add --all -y
 
-shutdown() {
-  log "Shutting down sandbox..."
-  kill -TERM "$NEXT_PID" 2>/dev/null || true
-  wait "$NEXT_PID" || true
-  exit 0
-}
+EXPOSE 3000
 
-trap shutdown SIGINT SIGTERM
-
-cd "$APP_DIR"
-
-log "Starting Next.js dev server..."
-
-npm run dev -- --turbopack --port "$PORT" &
-NEXT_PID=$!
-
-wait_for_port
-
-log "Sandbox ready 🚀"
-
-wait "$NEXT_PID"
+CMD ["/compile_page.sh"]
