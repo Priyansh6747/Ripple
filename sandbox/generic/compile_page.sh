@@ -1,41 +1,45 @@
-FROM node:22-slim
+#!/usr/bin/env bash
 
-ENV NODE_ENV=development
-ENV PORT=3000
+APP_DIR="/home/user/app"
+PORT="${PORT:-3000}"
+START_TIMEOUT=120
 
-RUN apt-get update \
- && apt-get install -y curl git ca-certificates \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+log() {
+  echo "[sandbox] $1"
+}
 
-WORKDIR /home/user
+cd "$APP_DIR" || { echo "[sandbox] Failed to cd into $APP_DIR"; exit 1; }
 
-COPY compile_page.sh /compile_page.sh
-RUN chmod +x /compile_page.sh
+log "Starting Next.js dev server..."
+npm run dev -- --turbopack --port "$PORT" > /tmp/nextjs.log 2>&1 &
+NEXT_PID=$!
 
-RUN CI=true npx --yes create-next-app@16.1.6 app \
-  --ts \
-  --tailwind \
-  --eslint \
-  --app \
-  --src-dir \
-  --import-alias "@/*" \
-  --use-npm \
-  --no-git
+log "Waiting for Next.js on port ${PORT}..."
+start_time=$(date +%s)
 
-WORKDIR /home/user/app
+while true; do
+  if curl -s -o /dev/null -w "%{http_code}" --max-time 1 http://localhost:$PORT 2>/dev/null | grep -q "^[0-9]"; then
+    log "Next.js is ready 🚀"
+    break
+  fi
 
-RUN npm install
+  now=$(date +%s)
+  elapsed=$((now - start_time))
 
-RUN npm install \
-  lucide-react \
-  clsx \
-  tailwind-merge \
-  framer-motion
+  if [ "$elapsed" -gt "$START_TIMEOUT" ]; then
+    log "Timed out waiting for Next.js. Last logs:"
+    cat /tmp/nextjs.log
+    exit 1
+  fi
 
-RUN npx --yes shadcn@latest init -d
-RUN npx --yes shadcn@latest add --all -y
+  # Check if the process died
+  if ! kill -0 "$NEXT_PID" 2>/dev/null; then
+    log "Next.js process died. Logs:"
+    cat /tmp/nextjs.log
+    exit 1
+  fi
 
-EXPOSE 3000
+  sleep 0.5
+done
 
-CMD ["/compile_page.sh"]
+wait "$NEXT_PID"
