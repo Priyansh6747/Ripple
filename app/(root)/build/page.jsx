@@ -10,6 +10,7 @@ import {
     Code2,
     ExternalLink,
     Loader2,
+    Download,
     Wand2,
     Eye,
     RefreshCw,
@@ -97,6 +98,7 @@ export default function BuildPage() {
     const [sandboxId, setSandboxId] = useState("");
     const [error, setError] = useState("");
     const [logs, setLogs] = useState([]);
+    const [isPreparingDownload, setIsPreparingDownload] = useState(false);
     const pollRef = useRef(null);
     const iframeRef = useRef(null);
 
@@ -175,6 +177,47 @@ export default function BuildPage() {
 
     const handleSuggestion = (text) => {
         setPrompt(text);
+    };
+
+    const handleDownloadProject = async () => {
+        if (!sandboxId || isPreparingDownload) return;
+
+        setIsPreparingDownload(true);
+        addLog("📦 Preparing project archive for download…");
+
+        try {
+            const res = await fetch("/api/build/download", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ sandboxId }),
+            });
+
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error || "Failed to prepare download.");
+            }
+
+            const blob = await res.blob();
+            const contentDisposition = res.headers.get("content-disposition") || "";
+            const fileNameMatch = contentDisposition.match(/filename="([^"]+)"/i);
+            const filename = fileNameMatch?.[1] || "ripple-project.zip";
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+
+            addLog("✅ Download started.");
+        } catch (err) {
+            addLog(`❌ Download failed: ${err.message}`);
+            setError(err.message || "Failed to download project.");
+        } finally {
+            setIsPreparingDownload(false);
+        }
     };
 
     /* ─── Render ─────────────────────────────────────────── */
@@ -353,6 +396,23 @@ export default function BuildPage() {
                                     className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
                                 >
                                     <ExternalLink className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                    onClick={handleDownloadProject}
+                                    disabled={!sandboxId || isPreparingDownload}
+                                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border border-zinc-200 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {isPreparingDownload ? (
+                                        <>
+                                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                            Preparing...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Download className="w-3.5 h-3.5" />
+                                            Download Project
+                                        </>
+                                    )}
                                 </button>
                             </>
                         )}
