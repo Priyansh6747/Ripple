@@ -60,10 +60,10 @@ const STATUS_CONFIG = {
 };
 
 const SUGGESTIONS = [
-    "A modern SaaS landing page with pricing cards and testimonials",
-    "A portfolio page with project gallery and animated hero section",
-    "A coffee shop website with menu, about us, and contact section",
-    "A todo app dashboard with sidebar navigation and dark theme",
+    "A dark-themed SaaS landing page with aurora hero, pricing tiers, and testimonials marquee",
+    "A sleek developer tool site with animated star field hero, feature cards, and code demo section",
+    "A clean white SaaS site with bouncy feature cards, review marquee, and multi-tier pricing",
+    "A light-themed product landing page with dashboard preview, FAQ section, and CTA",
 ];
 
 /* ─── StatusDot ──────────────────────────────────────────── */
